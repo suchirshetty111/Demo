@@ -144,3 +144,22 @@ plt.show()
 
 output:
 Images....
+
+-----------------------------------------------------------------------------------------------------------
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+data = pd.read_csv('diabetes(1).csv')
+X, y = data.iloc[:, :-1].values, data.iloc[:, -1].values
+X_scaled = StandardScaler().fit_transform(X)
+X_pca = PCA(n_components=2).fit_transform(X_scaled)
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, cmap='viridis', edgecolor='k', s=50)
+plt.title('PCA of Diabetes Dataset')
+plt.xlabel('PC 1')
+plt.ylabel('PC 2')
+plt.colorbar()
+plt.show()
+
+with using PCA
