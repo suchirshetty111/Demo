@@ -3,16 +3,16 @@ import pandas as pd
 from sklearn.datasets import load_diabetes
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from mlxtend.feature_selection import ExhaustiveFeatureSelector
+from sklearn.feature_selection import RFE
 from sklearn.preprocessing import StandardScaler
 
 # Load and preprocess data
 df = load_diabetes(as_frame=True).frame
 X, y = df.drop(columns=['target']), df['target']
-X_train, X_test, y_train, y_test = train_test_split(StandardScaler().fit_transform(X), y, test_size=0.2, random_state=42)
+X_train, _, y_train, _ = train_test_split(StandardScaler().fit_transform(X), y, test_size=0.2, random_state=42)
 
-# Exhaustive Feature Selection
-efs = ExhaustiveFeatureSelector(LinearRegression(), min_features=1, max_features=5, scoring='r2', cv=5)
-efs.fit(X_train, y_train)
+# Recursive Feature Elimination (RFE)
+rfe = RFE(LinearRegression(), n_features_to_select=5)
+rfe.fit(X_train, y_train)
 
-print("Best Feature Subset:", list(X.columns[list(efs.best_idx_)]))
+print("Selected Features:", X.columns[rfe.support_])
