@@ -1,23 +1,18 @@
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
 from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from mlxtend.feature_selection import ExhaustiveFeatureSelector
 from sklearn.preprocessing import StandardScaler
 
 # Load and preprocess data
 df = load_diabetes(as_frame=True).frame
 X, y = df.drop(columns=['target']), df['target']
-X_scaled = sm.add_constant(StandardScaler().fit_transform(X))
+X_train, X_test, y_train, y_test = train_test_split(StandardScaler().fit_transform(X), y, test_size=0.2, random_state=42)
 
-# Backward Elimination
-def backward_elimination(X, y, sl=0.05):
-    while True:
-        model = sm.OLS(y, X).fit()
-        max_p = model.pvalues.max()
-        if max_p > sl:
-            X = X.drop(columns=[model.pvalues.idxmax()])
-        else:
-            return X, model
+# Exhaustive Feature Selection
+efs = ExhaustiveFeatureSelector(LinearRegression(), min_features=1, max_features=5, scoring='r2', cv=5)
+efs.fit(X_train, y_train)
 
-X_selected, final_model = backward_elimination(pd.DataFrame(X_scaled, columns=['Intercept'] + list(X.columns)), y)
-print("\nFinal Selected Features:", list(X_selected.columns))
+print("Best Feature Subset:", list(X.columns[list(efs.best_idx_)]))
